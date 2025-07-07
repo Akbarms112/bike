@@ -1,0 +1,196 @@
+<?php
+session_start();
+require 'config.php';
+
+use PHPMailer\PHPMailer\PHPMailer;
+use PHPMailer\PHPMailer\SMTP;
+use PHPMailer\PHPMailer\Exception;
+
+require 'PHPMailer/src/Exception.php'; 
+require 'PHPMailer/src/PHPMailer.php';
+require 'PHPMailer/src/SMTP.php';
+
+if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['shop_name'], $_POST['shop_lat'], $_POST['shop_lon'], $_POST['customer_name'], $_POST['customer_phone'], $_POST['customer_email'])) {
+
+    $shop_name = htmlspecialchars(trim($_POST['shop_name']));
+    $shop_lat = filter_var($_POST['shop_lat'], FILTER_VALIDATE_FLOAT);
+    $shop_lon = filter_var($_POST['shop_lon'], FILTER_VALIDATE_FLOAT);
+    $customer_name = htmlspecialchars(trim($_POST['customer_name']));
+    $customer_phone = htmlspecialchars(trim($_POST['customer_phone']));
+    $customer_email = htmlspecialchars(trim($_POST['customer_email']));
+    
+    $address = $_SESSION['user_address'] ?? 'N/A';
+    $user_lat = $_SESSION['user_lat'] ?? 0;
+    $user_lon = $_SESSION['user_lon'] ?? 0;
+
+    if ($shop_lat === false || $shop_lon === false) {
+        die("<p style='color: red;'>Invalid shop location.</p>");
+    }
+
+    $amount = 100;
+    $order_id = rand(10000, 99999);
+
+    $conn = new mysqli(DB_HOST, DB_USER, DB_PASS, DB_NAME);
+    if ($conn->connect_error) {
+        die("<p style='color: red;'>Database connection failed: " . $conn->connect_error . "</p>");
+    }
+
+    $stmt = $conn->prepare("INSERT INTO bookings (user, phone, shop_name, shop_lat, shop_lon, pickup_option, amount, status) VALUES (?, ?, ?, ?, ?, 'you', ?, 'Not Paid')");
+    $stmt->bind_param("sssssd", $customer_name, $customer_phone, $shop_name, $shop_lat, $shop_lon, $amount);
+
+    if ($stmt->execute()) {
+        $booking_id = $stmt->insert_id;
+    } else {
+        die("<p style='color: red;'>Error: " . $stmt->error . "</p>");
+    }
+
+    $stmt->close();
+    $conn->close();
+
+    $mail = new PHPMailer(true);
+    try {
+        $mail->isSMTP();
+        $mail->Host = 'smtp.gmail.com';
+        $mail->SMTPAuth = true;
+        $mail->Username = 't2970642@gmail.com';
+        $mail->Password = 'adxb sbln odjg abpu';
+        $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
+        $mail->Port = 587;
+
+        $mail->setFrom('t2970642@gmail.com', 'Bike Wash Service');
+        $mail->addAddress($customer_email);
+
+        $mail->isHTML(true);
+        $mail->Subject = 'Bike Wash Booking Confirmation';
+        $mail->Body = "
+            <h2>Booking Confirmation</h2>
+            <p>Dear $customer_name,</p>
+            <p>Your booking at <strong>$shop_name</strong> has been confirmed.</p>
+            <p>Booking ID: <strong>$order_id</strong></p>
+            <p>Thank you for choosing our service!</p>
+        ";
+
+        $mail->send();
+    } catch (Exception $e) {
+        error_log("Mail error: " . $mail->ErrorInfo);
+    }
+
+    $upi_id = "haransrihari533@oksbi";
+    $upi_link = "upi://pay?pa=" . urlencode($upi_id) . "&pn=" . urlencode("SRIHARIHARAN S") . "&tid=" . urlencode($order_id) . "&tr=" . urlencode($order_id) . "&tn=" . urlencode("Bike Wash Payment") . "&am=" . urlencode($amount) . "&cu=INR";
+    $qr_code_url = "https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=" . urlencode($upi_link);
+?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Booking Confirmation</title>
+<style>
+    body {
+        font-family: Arial, sans-serif;
+        background: url('img(6).jpg') no-repeat center center fixed;
+        background-size: cover;
+        margin: 0;
+        padding: 0;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        min-height: 100vh;
+        color: #f4f4f4;
+    }
+    .container {
+        width: 95%;
+        max-width: 850px;
+        background: rgba(0, 0, 0, 0.8);
+        padding: 40px;
+        border-radius: 15px;
+        box-shadow: 0px 8px 25px rgba(0, 0, 0, 0.3);
+        text-align: center;
+    }
+    h2, h3 { color: #ffc107; margin-bottom: 15px; }
+    .details {
+        background: #fff3cd;
+        padding: 15px;
+        border-radius: 8px;
+        color: black;
+        margin-bottom: 20px;
+        text-align: left;
+    }
+    .qr-container {
+        display: none;
+        text-align: center;
+        margin: 20px 0;
+    }
+    img.qr-code {
+        width: 200px;
+        height: 200px;
+        border: 5px solid #ffc107;
+        border-radius: 10px;
+    }
+    .pay-btn {
+        padding: 12px;
+        font-size: 16px;
+        font-weight: bold;
+        color: white;
+        border: none;
+        border-radius: 8px;
+        cursor: pointer;
+        margin-top: 10px;
+    }
+    .proceed { background-color: #17a2b8; }
+    .paid { background-color: #28a745; }
+    .cod { background-color: #ffc107; color: black; }
+</style>
+<script>
+function showQR() {
+    document.querySelector(".qr-container").style.display = "block";
+}
+function updatePaymentStatus(status) {
+    fetch("update_status.php", {
+        method: "POST",
+        headers: { "Content-Type": "application/x-www-form-urlencoded" },
+        body: "id=<?php echo $booking_id; ?>&status=" + status
+    }).then(() => {
+        alert("Booking confirmed! Redirecting...");
+        window.location.href = "home.php";
+    });
+}
+</script>
+</head>
+<body>
+<div class="container">
+    <h2>Booking Confirmed</h2>
+    <div class="details">
+        <h3>Customer Details</h3>
+        <p><strong>Name:</strong> <?php echo $customer_name; ?></p>
+        <p><strong>Phone:</strong> <?php echo $customer_phone; ?></p>
+        <p><strong>Email:</strong> <?php echo $customer_email; ?></p>
+        <p><strong>Address:</strong> <?php echo $address; ?></p>
+        <p><strong>Latitude:</strong> <?php echo $user_lat; ?></p>
+        <p><strong>Longitude:</strong> <?php echo $user_lon; ?></p>
+        <p><strong>Total Amount:</strong> ₹<?php echo $amount; ?></p>
+    </div>
+
+    <h3>Shop</h3>
+    <div class="details">
+        <p><strong>Shop Name:</strong> <?php echo $shop_name; ?></p>
+        <p><strong>Location:</strong> <a href="https://www.google.com/maps?q=<?php echo $shop_lat; ?>,<?php echo $shop_lon; ?>" target="_blank">View on Google Maps</a></p>
+    </div>
+
+    <button class="pay-btn proceed" onclick="showQR()">🚀 Proceed to Pay</button>
+
+    <div class="qr-container">
+        <h3>Scan & Pay</h3>
+        <img class="qr-code" src="<?php echo $qr_code_url; ?>" alt="UPI QR Code">
+        <br>
+        <button class="pay-btn paid" onclick="updatePaymentStatus('Paid')">✅ Pay Online</button>
+        <button class="pay-btn cod" onclick="updatePaymentStatus('Not Paid')">💵 Cash on Delivery</button>
+    </div>
+</div>
+</body>
+</html>
+
+<?php
+} else {
+    echo "<h2>Invalid request</h2>";
+}
+?>

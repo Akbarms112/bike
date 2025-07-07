@@ -1,0 +1,192 @@
+//dashboard
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Bike Wash Booking</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Arial', sans-serif;
+    }
+    body {
+      background: url('img(5).jpg') no-repeat center center/cover;
+      color: #fff;
+    }
+    .navbar {
+      background-color: rgba(30, 58, 138, 0.9);
+      color: white;
+      padding: 20px;
+      text-align: center;
+      font-size: 24px;
+      font-weight: bold;
+      letter-spacing: 1px;
+    }
+    .container {
+      max-width: 600px;
+      width: 1000px;
+      height: auto;
+      margin: 50px auto;
+      padding: 25px;
+      background: rgba(0, 0, 0, 0.8);
+      box-shadow: 0px 4px 15px rgba(0, 0, 0, 0.2);
+      border-radius: 15px;
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(255, 255, 255, 0.4);
+    }
+    h2 {
+      color: white;
+      text-align: center;
+      margin-bottom: 20px;
+    }
+    input {
+      display: block;
+      width: 100%;
+      padding: 12px;
+      margin-top: 10px;
+      border-radius: 5px;
+      border: none;
+      font-size: 16px;
+      background: rgba(255, 255, 255, 0.3);
+      color: #fff;
+      outline: none;
+    }
+    input::placeholder {
+      color: rgba(255, 255, 255, 0.7);
+    }
+    input:focus {
+      background: rgba(255, 255, 255, 0.5);
+      transition: 0.3s;
+    }
+    button {
+      display: block;
+      width: 100%;
+      padding: 12px;
+      margin-top: 15px;
+      border-radius: 5px;
+      border: none;
+      font-size: 16px;
+      font-weight: bold;
+      cursor: pointer;
+      background-color: #28a745;
+      color: white;
+      transition: background 0.3s ease-in-out;
+    }
+    button:hover {
+      background-color: #218838;
+    }
+    .footer {
+      text-align: center;
+      padding: 15px;
+      background-color: rgba(30, 58, 138, 0.9);
+      color: white;
+      font-size: 14px;
+      margin-top: 30px;
+    }
+    .options button {
+      width: 30%;
+      display: inline-block;
+      margin-right: 5px;
+    }
+    .hidden {
+      display: none;
+    }
+    @media (max-width: 768px) {
+      .container {
+        width: 90%;
+        padding: 20px;
+      }
+      .navbar {
+        font-size: 20px;
+      }
+      button {
+        font-size: 14px;
+      }
+      .options button {
+        width: 100%;
+        margin-bottom: 10px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <nav class="navbar">
+    Bike Wash Booking
+  </nav>
+
+  <div class="container">
+    <form action="find_shop.php" method="POST">
+      <h2>Your Information</h2>
+      <label>NAME :</label>
+      <input type="text" name="username" placeholder="Full Name" required/>
+      <br />
+      <label>PHONE NUMBER :</label>
+      <input type="tel" name="phone" placeholder="Phone Number" required/>
+      <br />
+      <label>EMAIL :</label>
+      <input type="text" name="email" placeholder="Email" required/>
+      <br />
+
+      <div class="options">
+        <button type="button" onclick="setOption('pickup')">Pickup</button>
+        <button type="button" onclick="setOption('drop')">Drop</button>
+        <button type="button" onclick="setOption('both')">Pick & Drop</button>
+      </div>
+
+      <br />
+
+      <div id="pickup_section">
+        <label id="addressLabel">ADDRESS :</label>
+        <input type="text" name="address" id="addressInput" placeholder="Enter Address" required/>
+      </div>
+
+      <div id="drop_section" class="hidden">
+        <label>DROP ADDRESS :</label>
+        <input type="text" name="drop_address" placeholder="Enter Drop Address"/>
+      </div>
+
+      <br />
+      <h2>Bike Details</h2>
+      <label>BIKE_MODEL :</label>
+      <input type="text" name="bike_model" placeholder="Bike Name/Model" required/>
+      <br />
+      <label>BIKE_NUMBER :</label>
+      <input type="text" name="bike_number" placeholder="Bike Number" required/>
+      <br />
+      <label>BIKE_COLOUR :</label>
+      <input type="text" name="bike_color" placeholder="Bike Color" required/>
+
+      <button type="submit">Find Nearby Centers</button>
+    </form>
+  </div>
+
+  <footer class="footer">
+    © 2025 Bike Wash Booking | All Rights Reserved
+  </footer>
+
+  <script>
+    function setOption(option) {
+      const addressLabel = document.getElementById('addressLabel');
+      const addressInput = document.getElementById('addressInput');
+      const dropSection = document.getElementById('drop_section');
+
+      if (option === 'pickup') {
+        addressLabel.innerText = 'PICKUP ADDRESS :';
+        addressInput.name = 'pickup_address';
+        dropSection.classList.add('hidden');
+      } else if (option === 'drop') {
+        addressLabel.innerText = 'DROP ADDRESS :';
+        addressInput.name = 'drop_address';
+        dropSection.classList.add('hidden');
+      } else if (option === 'both') {
+        addressLabel.innerText = 'PICKUP ADDRESS :';
+        addressInput.name = 'pickup_address';
+        dropSection.classList.remove('hidden');
+      }
+    }
+  </script>
+</body>
+</html>

@@ -1,0 +1,70 @@
+/*USE THIS*/
+CREATE DATABASE bikewash;
+USE bikewash;
+
+CREATE TABLE bookings (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    user VARCHAR(255) NOT NULL,
+    phone VARCHAR(15) NOT NULL,
+    shop_name VARCHAR(255) NOT NULL,
+    shop_lat DECIMAL(10, 7) NOT NULL,
+    shop_lon DECIMAL(10, 7) NOT NULL,
+    booking_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    pickup_time DATETIME DEFAULT NULL,
+    drop_time DATETIME DEFAULT NULL,
+    pickup_option ENUM('you', 'us') DEFAULT 'you',
+    amount DECIMAL(10, 2) DEFAULT 0.00,
+    status ENUM('Not Paid', 'Paid', 'Completed', 'Cancelled') DEFAULT 'Not Paid'
+);
+ALTER TABLE bookings
+ADD COLUMN pickup_option VARCHAR(50) AFTER status,
+ADD COLUMN amount DECIMAL(10, 2) AFTER pickup_option;
+
+ALTER TABLE bookings 
+ADD COLUMN pickup_option ENUM('you', 'us') DEFAULT 'you',
+ADD COLUMN amount DECIMAL(10, 2) DEFAULT 0.00,
+ADD COLUMN is_paid TINYINT(1) DEFAULT 0;
+Choose your pickup preference:
+
+🚶 I will bring the bike myself
+🚚 Please pick up my bike
+-------------------------------------------------------------------------------------------------------------------------
+/*USE THIS*/
+CREATE DATABASE admin_db;
+USE admin_db;
+
+CREATE TABLE users (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    full_name VARCHAR(100),
+    email VARCHAR(100) UNIQUE NOT NULL,
+    password VARCHAR(255) NOT NULL
+);
+-------------------------------------------------------------------------------------------------------------------------
+/*USE THIS*/
+CREATE DATABASE user_db;
+USE user_db;
+
+CREATE TABLE users (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    full_name VARCHAR(100),
+    email VARCHAR(100) UNIQUE NOT NULL,
+    password VARCHAR(255) NOT NULL
+);
+-------------------------------------------------------------------------------------------------------------------------
+
+/*NOT RECOMENDED TO USE THIS DATABASE*/
+CREATE DATABASE bikewash;
+USE bikewash;
+
+CREATE TABLE bookings (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    user VARCHAR(255) NOT NULL,
+    phone VARCHAR(15) NOT NULL,
+    shop_name VARCHAR(255) NOT NULL,
+    shop_lat DECIMAL(10, 7) NOT NULL,
+    shop_lon DECIMAL(10, 7) NOT NULL,
+    booking_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    pickup_time DATETIME DEFAULT NULL,
+    drop_time DATETIME DEFAULT NULL,
+    status ENUM('Cash on Delivery', 'Paid') DEFAULT 'Cash on Delivery'
+);

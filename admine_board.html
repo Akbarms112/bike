@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin Dashboard</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: Arial, sans-serif;
+    }
+
+    body {
+      background-color: #f4f4f4;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 20px;
+    }
+
+    .container {
+      width: 95%;
+      max-width: 1400px;
+      background: white;
+      padding: 25px;
+      box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+      border-radius: 10px;
+      text-align: center;
+      overflow-x: auto;
+    }
+
+    h2 {
+      margin-bottom: 20px;
+      color: #333;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 20px;
+      background: white;
+      border-radius: 8px;
+      overflow: hidden;
+    }
+
+    th, td {
+      padding: 10px;
+      border: 1px solid #ddd;
+      text-align: center;
+      font-size: 14px;
+    }
+
+    th {
+      background-color: #1e3a8a;
+      color: white;
+      font-weight: bold;
+    }
+
+    tr:nth-child(even) {
+      background-color: #f9f9f9;
+    }
+
+    tr:hover {
+      background-color: #f1f1f1;
+    }
+
+    .home-btn {
+      display: inline-block;
+      background-color: #1e3a8a;
+      color: white;
+      padding: 12px 24px;
+      font-size: 16px;
+      font-weight: bold;
+      text-decoration: none;
+      border-radius: 5px;
+      border: none;
+      cursor: pointer;
+      transition: background 0.3s ease;
+      margin-top: 20px;
+    }
+
+    .home-btn:hover {
+      background-color: #0f256e;
+    }
+
+    @media (max-width: 768px) {
+      table {
+        font-size: 12px;
+      }
+
+      .home-btn {
+        width: 100%;
+        padding: 15px;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <h2>Admin Dashboard - Bookings</h2>
+    <table>
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>User</th>
+          <th>Phone</th>
+          <th>Email</th>
+          <th>Bike Model</th>
+          <th>Bike Number</th>
+          <th>Bike Color</th>
+          <th>Shop Name</th>
+          <th>Pickup Address</th>
+          <th>Drop Address</th>
+          <th>Pickup Option</th>
+          <th>Status</th>
+          <!--<th>Paid</th>-->
+          <th>Amount (₹)</th>
+          <th>Booking Time</th>
+          <th>Pickup Time</th>
+          <th>Drop Time</th>
+        </tr>
+      </thead>
+      <tbody id="bookingTable">
+        <!-- Dynamic data -->
+      </tbody>
+    </table>
+    <a href="home.php">
+      <button class="home-btn">Click to Home</button>
+    </a>
+  </div>
+
+  <script>
+    async function fetchBookings() {
+      try {
+        let response = await fetch("get_bookings.php");
+        let data = await response.json();
+
+        if (data.status === "success") {
+          let bookings = data.data;
+          let tableBody = document.getElementById("bookingTable");
+          tableBody.innerHTML = "";
+
+          bookings.forEach(booking => {
+            let pickupLabel = booking.pickup_option === 'us' ? 'Pickup by Us' : 'Pickup by You';
+            let paidStatus = booking.is_paid == 1 ? 'Paid' : 'Not Paid';
+
+            let row = `<tr>
+              <td>${booking.id}</td>
+              <td>${booking.user}</td>
+              <td>${booking.phone}</td>
+              <td>${booking.email}</td>
+              <td>${booking.bike_model}</td>
+              <td>${booking.bike_number}</td>
+              <td>${booking.bike_color}</td>
+              <td>${booking.shop_name}</td>
+              <td>${booking.pickup_address}</td>
+              <td>${booking.drop_address}</td>
+              <td>${pickupLabel}</td>
+              <td>${booking.status}</td>
+             
+              <td>₹${booking.amount}</td>
+              <td>${booking.booking_time}</td>
+              <td>${booking.pickup_time ?? '-'}</td>
+              <td>${booking.drop_time ?? '-'}</td>
+            </tr>`;
+            tableBody.innerHTML += row;
+          });
+        } else {
+          alert("Error fetching data: " + data.message);
+        }
+      } catch (error) {
+        console.error("Error fetching bookings:", error);
+      }
+    }
+
+    fetchBookings();
+  </script>
+
+</body>
+</html>
